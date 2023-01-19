@@ -38,12 +38,13 @@ class BinomialHeap<T : Comparable<T>> private constructor(private val trees: FLi
     private fun <T> FList<T?>.tail(): FList<T?> = if (this is FList.Cons) tail else flistOf()
 
     override fun plus(other: BinomialHeap<T>): BinomialHeap<T> {
-        fun plusTreesNull(first: BinomialTree<T>?, second: BinomialTree<T>?): Pair<BinomialTree<T>?, BinomialTree<T>?> {
-            return if (first == null && second == null) Pair(null, null)
-            else if (first == null) Pair(null, second)
-            else if (second == null) Pair(null, first)
-            else Pair(first.plus(second), null)
-        }
+        fun plusTreesNull(first: BinomialTree<T>?, second: BinomialTree<T>?): Pair<BinomialTree<T>?, BinomialTree<T>?> =
+            when {
+                (first == null && second == null) -> null to null
+                (first == null) -> null to second
+                (second == null) -> null to first
+                else -> first + second to null
+            }
 
         fun merge(
             firstHeap: FList<BinomialTree<T>?>,

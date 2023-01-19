@@ -57,10 +57,9 @@ sealed class FList<T> : Iterable<T> {
      * Также для борьбы с бойлерплейтом были введены функция и свойство nil в компаньоне
      */
     data class Nil<T>(private val dummy: Int = 0) : FList<T>() {
-        override val size: Int
-            get() = 0
-        override val isEmpty: Boolean
-            get() = true
+        override val size: Int = 0
+
+        override val isEmpty: Boolean = true
 
         override fun <U> fold(base: U, f: (U, T) -> U): U = base
 
@@ -81,28 +80,40 @@ sealed class FList<T> : Iterable<T> {
             get() = false
 
         override fun <U> fold(base: U, f: (U, T) -> U): U {
-            fun recFold(acc: U, tail: Cons<T>): U {
-                return if (tail.size == 1) {
-                    f(acc, tail.head)
-                } else {
-                    recFold(f(acc, tail.head), tail.tail as Cons<T>)
-                }
-            }
+            tailrec fun recFold(acc: U, tail: Cons<T>): U =
+                if (tail.size == 1) f(acc, tail.head) else recFold(f(acc, tail.head), tail.tail as Cons<T>)
             return recFold(base, this)
         }
 
-        override fun filter(f: (T) -> Boolean): FList<T> = if (f(head)) Cons(head, tail.filter(f)) else tail.filter(f)
+        override fun filter(f: (T) -> Boolean): FList<T> {
+            tailrec fun recFilter(fList: FList<T>, it: Iterator<T>) : FList<T> {
+                if (!it.hasNext()) return fList
+                val next = it.next()
+                return if (f(next)) recFilter(Cons(next, fList), it) else recFilter(fList, it)
+            }
+            return recFilter(nil(), iterator()).reverse()
+        }
 
-        override fun <U> map(f: (T) -> U): FList<U> = Cons(f(head), tail.map(f))
+        override fun <U> map(f: (T) -> U): FList<U> {
+            tailrec fun recMap(fList: FList<U>, it: Iterator<T>) : FList<U> =
+                if (!it.hasNext()) fList
+                else recMap(Cons(f(it.next()), fList), it)
+
+            return recMap(nil(), iterator()).reverse()
+        }
 
         override fun iterator(): Iterator<T> = object : Iterator<T> {
             var curr: FList<T> = this@Cons
             override fun hasNext(): Boolean = !curr.isEmpty
 
             override fun next(): T {
-                val ret = (curr as Cons).head
-                curr = (curr as Cons).tail
-                return ret
+                if (hasNext()) {
+                    val ret = (curr as Cons).head
+                    curr = (curr as Cons).tail
+                    return ret
+                } else {
+                    throw NoSuchElementException("End has been reached")
+                }
             }
         }
     }
@@ -116,6 +127,9 @@ sealed class FList<T> : Iterable<T> {
 // конструирование функционального списка в порядке следования элементов
 // требуемая сложность - O(n)
 fun <T> flistOf(vararg values: T): FList<T> {
-    return if (values.isEmpty()) FList.nil()
-    else FList.Cons(values.first(), flistOf(*values.sliceArray(1 until values.size)))
+    tailrec fun recFlistOf(fList: FList<T>, vararg values: T) : FList<T> =
+        if (values.isEmpty()) fList
+        else recFlistOf(FList.Cons(values.first(), fList), *values.sliceArray(1 until values.size))
+
+    return recFlistOf(FList.Nil(), *values)
 }
