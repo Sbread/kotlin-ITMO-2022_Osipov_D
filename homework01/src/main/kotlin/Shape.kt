@@ -15,6 +15,7 @@ interface Shape : DimensionAware, SizeAware
  */
 class DefaultShape(private vararg val dimensions: Int) : Shape {
     private var shapeSize = 1
+    override val ndim: Int = dimensions.size
 
     init {
         if (ndim == 0) {
@@ -27,9 +28,6 @@ class DefaultShape(private vararg val dimensions: Int) : Shape {
             shapeSize *= dimension.value
         }
     }
-
-    override val ndim: Int
-        get() = dimensions.size
 
     override fun dim(i: Int): Int {
         if (i < 0 || i >= ndim) {

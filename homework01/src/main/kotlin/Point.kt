@@ -9,6 +9,7 @@ interface Point : DimensionAware
  * Сама коллекция параметров недоступна, доступ - через методы интерфейса
  */
 class DefaultPoint(private vararg val coordinates: Int) : Point {
+    override val ndim: Int = coordinates.size
     init {
         if (ndim == 0) {
             throw PointArgumentException.EmptyPointException()
@@ -19,9 +20,6 @@ class DefaultPoint(private vararg val coordinates: Int) : Point {
             }
         }
     }
-
-    override val ndim: Int
-        get() = coordinates.size
 
     override fun dim(i: Int): Int {
         if (i < 0 || i >= ndim) {

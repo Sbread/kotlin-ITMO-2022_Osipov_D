@@ -1,5 +1,3 @@
-import java.lang.IllegalArgumentException
-
 interface NDArray : SizeAware, DimensionAware {
     /*
      * Получаем значение по индексу point
@@ -76,7 +74,6 @@ interface NDArray : SizeAware, DimensionAware {
      */
     fun dot(other: NDArray): NDArray
 
-    fun atIndex(index: Int): Int
 }
 
 /*
@@ -106,10 +103,8 @@ class DefaultNDArray private constructor(private val NDArrayData: IntArray, priv
         }
     }
 
-    override val size: Int
-        get() = NDArrayData.size
-    override val ndim: Int
-        get() = NDArrayShape.ndim
+    override val size: Int = NDArrayData.size
+    override val ndim: Int = NDArrayShape.ndim
 
     override fun dim(i: Int) = NDArrayShape.dim(i)
 
@@ -138,13 +133,7 @@ class DefaultNDArray private constructor(private val NDArrayData: IntArray, priv
 
     override fun copy() = DefaultNDArray(NDArrayData.copyOf(), NDArrayShape)
 
-    override fun view() = this
-
-    override fun atIndex(index: Int): Int {
-        if (index in 0 until size) {
-            return NDArrayData[index]
-        } else throw IllegalArgumentException("index $index is not in NDArray size - $size")
-    }
+    override fun view() = object : NDArray by this {}
 
     override fun add(other: NDArray) {
         if (ndim != other.ndim && ndim != other.ndim + 1) {
