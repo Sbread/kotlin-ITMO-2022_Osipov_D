@@ -7,5 +7,5 @@ object RedditApi {
 
     fun getTopicJSONAboutURL(topicName : String) = "$reddit/r/$topicName/about.$json"
 
-    fun getCommentsJSONURL(topicName: String, title : String) = "$reddit/r/$topicName/comments/$title/.$json"
+    fun getCommentsJSONURL(url: String) = "$url.$json"
 }
