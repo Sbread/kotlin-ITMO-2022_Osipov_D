@@ -1,12 +1,10 @@
 package homework03.client
 
 import com.fasterxml.jackson.databind.DeserializationFeature
-import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
 import homework03.client.RedditApi.getCommentsJSONURL
 import homework03.client.RedditApi.getTopicJSONAboutURL
 import homework03.client.RedditApi.getTopicJSONURL
-import homework03.json.comment.Comment
 import homework03.json.comment.CommentsSnapshot
 import homework03.json.topic.PostChildData
 import homework03.json.topic.TopicInfoData
@@ -33,8 +31,8 @@ object  RedditClient {
         )
     }
 
-    suspend fun getComments(topicName: String, title: String): CommentsSnapshot {
-        val json: String = httpClient.get(getCommentsJSONURL(topicName, title)).body()
+    suspend fun getComments(url: String): CommentsSnapshot {
+        val json: String = httpClient.get(url).body()
         return CommentsSnapshot.deserialize(objectMapper, json)
     }
 }

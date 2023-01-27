@@ -50,6 +50,5 @@ data class CommentsSnapshot(val comments: List<Comment>) {
             }
             return CommentsSnapshot(comments)
         }
-
     }
 }

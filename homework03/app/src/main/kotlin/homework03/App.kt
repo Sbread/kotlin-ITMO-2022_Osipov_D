@@ -15,8 +15,8 @@ import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.runBlocking
 
 fun main(args: Array<String>) = runBlocking {
-    if (args.size <= 2) {
-        throw IllegalArgumentException("Expected not less than one topic name")
+    if (args.size < 2) {
+        throw IllegalArgumentException("Expected path + not less than one topic name")
     }
     val topicsSnapshots = arrayListOf<Deferred<TopicSnapshot>>()
     val commentsSnapshots = arrayListOf<Deferred<CommentsSnapshot>>()
@@ -27,7 +27,7 @@ fun main(args: Array<String>) = runBlocking {
     val topicsCsv = csvSerialize(topicsSnapshots.awaitAll(), TopicSnapshot::class)
     for (topicSnapshot in topicsSnapshots.awaitAll()) {
         for (post in topicSnapshot.posts) {
-            commentsSnapshots.add(async { RedditClient.getComments(args[1], post.title) })
+            commentsSnapshots.add(async { RedditClient.getComments(post.url) })
         }
     }
     val commentsCsv = csvSerialize(commentsSnapshots.awaitAll().map { it.flatten() }.flatten(), Comment::class)
