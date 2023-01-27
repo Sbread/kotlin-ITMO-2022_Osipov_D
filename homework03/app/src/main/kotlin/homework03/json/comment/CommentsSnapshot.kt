@@ -27,7 +27,7 @@ data class CommentsSnapshot(val comments: List<Comment>) {
                     for (ch in commentJsonNode["data"]["replies"]["data"]["children"]) {
                         try {
                             val comment = deserializeComment(ch, curId, depth + 1)
-                            child.add(deserializeComment(ch, curId, depth + 1))
+                            child.add(comment)
                         } catch (_: NullPointerException) {}
                     }
                 } catch (_: NullPointerException) {}
