@@ -14,19 +14,23 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.runBlocking
 
-fun main(args: Array<String>) = runBlocking{
-    if (args.size % 2 == 0 || args.size < 3) {
-        throw IllegalArgumentException("Expected path and pairs <topic, comment>")
+fun main(args: Array<String>) = runBlocking {
+    if (args.size <= 2) {
+        throw IllegalArgumentException("Expected not less than one topic name")
     }
     val topicsSnapshots = arrayListOf<Deferred<TopicSnapshot>>()
     val commentsSnapshots = arrayListOf<Deferred<CommentsSnapshot>>()
     val pathToSave = args[0]
-    for (i in 1 until args.size step 2) {
+    for (i in 1 until args.size) {
         topicsSnapshots.add(async { RedditClient.getTopic(args[i]) })
-        commentsSnapshots.add(async { RedditClient.getComments(args[i], args[i + 1]) })
     }
     val topicsCsv = csvSerialize(topicsSnapshots.awaitAll(), TopicSnapshot::class)
-    val commentsCsv = csvSerialize(commentsSnapshots.awaitAll().map { it.linearize() }.flatten(), Comment::class)
+    for (topicSnapshot in topicsSnapshots.awaitAll()) {
+        for (post in topicSnapshot.posts) {
+            commentsSnapshots.add(async { RedditClient.getComments(args[1], post.title) })
+        }
+    }
+    val commentsCsv = csvSerialize(commentsSnapshots.awaitAll().map { it.flatten() }.flatten(), Comment::class)
     CsvWriter.write(topicsCsv, pathToSave, "--subjects.csv")
     CsvWriter.write(commentsCsv, pathToSave, "--comments.csv")
 }

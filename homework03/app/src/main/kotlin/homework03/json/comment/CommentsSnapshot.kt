@@ -1,7 +1,10 @@
 package homework03.json.comment
 
+import com.fasterxml.jackson.databind.JsonNode
+import com.fasterxml.jackson.databind.ObjectMapper
+
 data class CommentsSnapshot(val comments: List<Comment>) {
-    fun linearize() : List<Comment> {
+    fun flatten() : List<Comment> {
         val line: MutableList<Comment> = arrayListOf()
         fun rec(comment: Comment) {
             line.add(comment)
@@ -11,5 +14,42 @@ data class CommentsSnapshot(val comments: List<Comment>) {
         }
         comments.forEach(::rec)
         return line
+    }
+
+    companion object {
+        fun deserialize(objectMapper: ObjectMapper, json : String) : CommentsSnapshot {
+            val tree: JsonNode = objectMapper.readTree(json)
+            var commentsId = 0L
+            fun deserializeComment(commentJsonNode: JsonNode, parentId: Long?, depth: Int): Comment {
+                val curId = commentsId++
+                val child: MutableList<Comment> = arrayListOf()
+                try {
+                    for (ch in commentJsonNode["data"]["replies"]["data"]["children"]) {
+                        try {
+                            val comment = deserializeComment(ch, curId, depth + 1)
+                            child.add(deserializeComment(ch, curId, depth + 1))
+                        } catch (_: NullPointerException) {}
+                    }
+                } catch (_: NullPointerException) {}
+
+                return Comment(
+                    created = commentJsonNode["data"]["created"].asDouble(),
+                    ups = commentJsonNode["data"]["ups"].asLong(),
+                    downs = commentJsonNode["data"]["downs"].asLong(),
+                    body = commentJsonNode["data"]["body"].toPrettyString(),
+                    author = commentJsonNode["data"]["author_fullname"].toPrettyString(),
+                    replyTo = parentId,
+                    replies = child,
+                    depth = depth,
+                    id = curId
+                )
+            }
+            val comments: MutableList<Comment> = arrayListOf()
+            for (comment in tree[1]["data"]["children"]) {
+                comments.add(deserializeComment(comment, null, 0))
+            }
+            return CommentsSnapshot(comments)
+        }
+
     }
 }
