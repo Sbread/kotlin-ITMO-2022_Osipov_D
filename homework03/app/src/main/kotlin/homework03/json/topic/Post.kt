@@ -10,5 +10,5 @@ data class Post(
     @JsonProperty("title") val title: String,
     @JsonProperty("selftext") val selfText: String?,
     @JsonProperty("selftext_html") val selfTextHtml: String?,
-    @JsonProperty("url") val url: String
+    @JsonProperty("permalink") val permalink: String
 )

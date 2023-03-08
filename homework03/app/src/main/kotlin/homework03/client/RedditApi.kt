@@ -1,5 +1,7 @@
 package homework03.client
 
+import com.soywiz.korio.file.std.resourcesVfsDebug
+
 object RedditApi {
     private const val reddit = "https://www.reddit.com"
     private const val json = "json"
@@ -7,5 +9,5 @@ object RedditApi {
 
     fun getTopicJSONAboutURL(topicName : String) = "$reddit/r/$topicName/about.$json"
 
-    fun getCommentsJSONURL(url: String) = "$url.$json"
+    fun getCommentsJSONURL(permalink: String) = "${reddit}${permalink}.$json"
 }

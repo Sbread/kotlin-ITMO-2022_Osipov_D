@@ -27,7 +27,7 @@ fun main(args: Array<String>) = runBlocking {
     val topicsCsv = csvSerialize(topicsSnapshots.awaitAll(), TopicSnapshot::class)
     for (topicSnapshot in topicsSnapshots.awaitAll()) {
         for (post in topicSnapshot.posts) {
-            commentsSnapshots.add(async { RedditClient.getComments(post.url) })
+            commentsSnapshots.add(async { RedditClient.getComments(post.permalink) })
         }
     }
     val commentsCsv = csvSerialize(commentsSnapshots.awaitAll().map { it.flatten() }.flatten(), Comment::class)

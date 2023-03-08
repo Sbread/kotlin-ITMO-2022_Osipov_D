@@ -31,8 +31,8 @@ object  RedditClient {
         )
     }
 
-    suspend fun getComments(url: String): CommentsSnapshot {
-        val json: String = httpClient.get(getCommentsJSONURL(url)).body()
+    suspend fun getComments(permalink: String): CommentsSnapshot {
+        val json: String = httpClient.get(getCommentsJSONURL(permalink)).body()
         return CommentsSnapshot.deserialize(objectMapper, json)
     }
 }
