@@ -32,12 +32,27 @@ data class CommentsSnapshot(val comments: List<Comment>) {
                     }
                 } catch (_: NullPointerException) {}
 
+                var body: String
+                var author: String
+
+                body = try {
+                    commentJsonNode["data"]["body"].toPrettyString()
+                } catch (_: NullPointerException) {
+                    ""
+                }
+
+                author = try {
+                    commentJsonNode["data"]["author_fullname"].toPrettyString()
+                } catch (_: NullPointerException) {
+                    ""
+                }
+
                 return Comment(
                     created = commentJsonNode["data"]["created"].asDouble(),
                     ups = commentJsonNode["data"]["ups"].asLong(),
                     downs = commentJsonNode["data"]["downs"].asLong(),
-                    body = commentJsonNode["data"]["body"].toPrettyString(),
-                    author = commentJsonNode["data"]["author_fullname"].toPrettyString(),
+                    body = body,
+                    author = author,
                     replyTo = parentId,
                     replies = child,
                     depth = depth,
